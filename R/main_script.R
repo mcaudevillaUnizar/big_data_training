@@ -59,7 +59,14 @@ print(results_dt)
 if (!dir.exists("data")) dir.create("data")
 
 # Guardar resultados en CSV
-data.table::fwrite(results_dt, "data/daily_avg_zaragoza_april2025.csv")
+data.table::fwrite(results_dt, "results/daily_avg_zaragoza_april2025.csv")
 
 # Finalizar plan paralelización para volver a secuencial
 plan(sequential)
+
+if (file.exists("data/daily_avg_zaragoza_april2025.csv")) {
+  cat("✅ Archivo CSV generado correctamente en 'data/'.\n")
+} else {
+  cat("❌ No se encontró el archivo en 'data/'.\n")
+}
+
