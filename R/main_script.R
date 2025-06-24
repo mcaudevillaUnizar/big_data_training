@@ -1,5 +1,4 @@
 # main_script.R
-
 install_and_load <- function(packages) {
   for (pkg in packages) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -11,7 +10,6 @@ install_and_load <- function(packages) {
 
 # Paquetes que usaremos
 packages <- c("data.table", "purrr", "furrr", "sf", "parallel", "arrow", "mapSpain", "dplyr", "future")
-
 install_and_load(packages)
 
 # Obtener polígono de Zaragoza
@@ -33,7 +31,7 @@ process_file <- function(file_path) {
   sf_data <- dplyr::select(sf_data, MeanTemperature, Precipitation, RelativeHumidity)
   
   data.table::data.table(
-    file = basename(file_path),
+    filename = basename(file_path),
     MeanTemperature = mean(sf_data$MeanTemperature, na.rm = TRUE),
     Precipitation = mean(sf_data$Precipitation, na.rm = TRUE),
     RelativeHumidity = mean(sf_data$RelativeHumidity, na.rm = TRUE)
@@ -47,7 +45,7 @@ results_list <- furrr::future_map(files, process_file)
 results_dt <- data.table::rbindlist(results_list)
 
 # Añadir columna fecha a partir del nombre del archivo (meteo_YYYYMMDD.gpkg)
-results_dt[, date := as.Date(sub("meteo_(\\d{8})\\.gpkg", "\\1", file), format = "%Y%m%d")]
+results_dt[, date := as.Date(sub("meteo_(\\d{8})\\.gpkg", "\\1", filename), format = "%Y%m%d")]
 
 # Ordenar por fecha
 results_dt <- results_dt[order(date)]
@@ -55,8 +53,8 @@ results_dt <- results_dt[order(date)]
 # Mostrar resultados
 print(results_dt)
 
-# Crear carpeta data si no existe
-if (!dir.exists("data")) dir.create("data")
+# Crear carpeta results si no existe
+if (!dir.exists("results")) dir.create("results")
 
 # Guardar resultados en CSV
 data.table::fwrite(results_dt, "results/daily_avg_zaragoza_april2025.csv")
